@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virginia Kitchen — 3D &amp; Visual Communication</title>
+<meta name="description" content="Working from a source of truth: 2D reference into accurate 3D assets and environments, and complex subjects into a single readable frame.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --field:#0E0E12; --mylar:#15151A; --mylar-2:#1C1C23;
+  --line:#26262F; --line-2:#3A3A47;
+  --graphite:#D8D5CE; --dim:#8A8792; --vellum:#F2F0EC;
+  --rev:#EE2A8C; --check:#00A9E0;
+  --misreg:2px;
+  --display:"Saira Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --gutter:clamp(1.15rem,4vw,3.5rem); --max:1240px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--field);color:var(--graphite);
+  font:400 clamp(.95rem,.4vw + .88rem,1.02rem)/1.65 var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+::selection{background:var(--rev);color:#fff}
+:focus-visible{outline:2px solid var(--check);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
+
+.tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:.28em .6em;border:1px solid var(--line-2);color:var(--dim);white-space:nowrap}
+.tag--check{border-color:var(--check);color:var(--check)}
+
+/* ---- edit banner: delete before sending ---- */
+.todo{background:#1A0D16;border-bottom:1px solid var(--rev);border-left:4px solid var(--rev)}
+.todo__inner{max-width:var(--max);margin:0 auto;padding:.9rem var(--gutter);
+  display:flex;gap:1rem;align-items:flex-start;justify-content:space-between}
+.todo p{margin:0;font-family:var(--mono);font-size:.72rem;line-height:1.75;color:#D9C2CE}
+.todo b{color:var(--rev);letter-spacing:.12em}
+.todo button{flex:none;background:none;border:1px solid var(--line-2);color:var(--dim);
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.4em .7em;cursor:pointer}
+.todo button:hover{color:var(--graphite);border-color:var(--graphite)}
+
+/* ---- sheet index rail ---- */
+.rail{position:sticky;top:0;z-index:40;background:rgba(16,22,25,.9);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.rail__inner{max-width:var(--max);margin:0 auto;padding:0 var(--gutter);
+  display:flex;align-items:center;gap:1.4rem;height:46px;overflow-x:auto;scrollbar-width:none}
+.rail__inner::-webkit-scrollbar{display:none}
+.rail__id{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--vellum);flex:none}
+.rail nav{display:flex;gap:1.1rem;margin-left:auto}
+.rail a{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);text-decoration:none;white-space:nowrap;padding:.3em 0;border-bottom:1px solid transparent}
+.rail a:hover,.rail a:focus-visible{color:var(--graphite);border-bottom-color:var(--rev)}
+
+/* ---- hero / title block ---- */
+.hero{border-bottom:1px solid var(--line);padding:clamp(2.6rem,6.5vw,5rem) 0 0}
+.hero__grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:clamp(1.5rem,4vw,3rem)}
+.hero__name{font-family:var(--display);font-weight:700;font-size:clamp(2.8rem,10vw,6.8rem);
+  line-height:.88;letter-spacing:.005em;text-transform:uppercase;color:var(--vellum);margin:0 0 1rem}
+.hero__role{font-family:var(--display);font-weight:600;font-size:clamp(1.05rem,2.3vw,1.5rem);
+  line-height:1.25;letter-spacing:.03em;text-transform:uppercase;color:var(--graphite);
+  margin:0 0 1.3rem;max-width:36ch}
+.hero__role em{font-style:normal;color:var(--rev)}
+.hero__thesis{max-width:56ch;margin:0 0 1.6rem}
+.hero__thesis strong{color:var(--vellum);font-weight:600}
+.block{border:1px solid var(--line);align-self:start}
+.block__row{border-bottom:1px solid var(--line);padding:.62rem .8rem}
+.block__row:last-child{border-bottom:0}
+.block__k{font-family:var(--mono);font-size:.57rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 .25rem}
+.block__v{margin:0;font-family:var(--mono);font-size:.78rem;line-height:1.5;
+  color:var(--graphite);word-break:break-word}
+.block__v a{text-decoration:none;border-bottom:1px solid var(--line-2)}
+.block__v a:hover{color:var(--check);border-bottom-color:var(--check)}
+.elig{display:flex;flex-wrap:wrap;gap:.45rem;padding:1.4rem 0 clamp(2rem,5vw,3rem)}
+
+/* ---- fit / positioning panel ---- */
+.fit{border-bottom:1px solid var(--line);padding:clamp(2.2rem,5vw,3.4rem) 0}
+.fit__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;
+  border:1px solid var(--line);border-bottom:0}
+.fit__cell{padding:1.15rem 1.2rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.fit__cell:last-child{border-right:0}
+.fit__cell h3{font-family:var(--display);font-weight:600;text-transform:uppercase;
+  letter-spacing:.04em;font-size:1.05rem;color:var(--vellum);margin:0 0 .5rem}
+.fit__cell p{margin:0;font-size:.9rem;line-height:1.6;color:var(--dim)}
+.fit__note{max-width:64ch;margin:1.4rem 0 0;font-size:.88rem;color:var(--dim)}
+
+/* ---- dimension divider ---- */
+.dim{display:flex;align-items:center;gap:1rem;padding:clamp(2.6rem,6vw,4.2rem) 0 1.4rem}
+.dim__label{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--dim);flex:none}
+.dim__line{flex:1;height:1px;background:var(--line-2);position:relative}
+.dim__line::before,.dim__line::after{content:"";position:absolute;top:-4px;width:1px;height:9px;background:var(--line-2)}
+.dim__line::before{left:0}
+.dim__line::after{right:0}
+
+/* ---- sheets ---- */
+.sheet{padding:0 0 clamp(2.6rem,6vw,4.4rem);border-bottom:1px solid var(--line)}
+.sheet__head{display:grid;grid-template-columns:auto minmax(0,1fr);
+  gap:clamp(1rem,3vw,2.2rem);align-items:start;margin-bottom:1.5rem}
+.sheet__no{font-family:var(--display);font-weight:700;font-size:clamp(3rem,8vw,5.4rem);
+  line-height:.8;color:#21212B;user-select:none}
+/* Plate misregistration. Tune with --misreg above: 2px as shipped,
+   1px for a whisper, 0 to remove. Or delete this one rule. */
+.sheet__no{
+  text-shadow:calc(var(--misreg) * -1) 0 0 rgba(238,42,140,.32),
+              var(--misreg) 0 0 rgba(0,169,224,.32);
+}
+.sheet__title{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.02em;
+  font-size:clamp(1.45rem,3.4vw,2.2rem);line-height:1.05;color:var(--vellum);margin:0 0 .6rem}
+.sheet__sub{margin:0;max-width:66ch;color:var(--dim)}
+
+.plates{display:grid;gap:.7rem;grid-template-columns:1fr}
+.plates--2{grid-template-columns:1fr 1fr}
+.plates--brief{grid-template-columns:minmax(0,.62fr) minmax(0,1fr);align-items:start}
+.plate{position:relative;background-color:var(--mylar-2);border:1px solid var(--line);overflow:hidden}
+.plate:not(.has-img){aspect-ratio:16/9;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:32px 32px,32px 32px}
+.plate:not(.has-img)::after{content:attr(data-file);position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:1.5rem;
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;line-height:1.9;
+  color:var(--dim);white-space:pre-line}
+.plate img{width:100%;height:auto}
+.plate.has-img{cursor:zoom-in}
+.plate.has-img::before{content:"Click to enlarge";position:absolute;right:0;bottom:0;z-index:2;
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);background:rgba(16,22,25,.85);padding:.35em .6em;
+  border-left:1px solid var(--line);border-top:1px solid var(--line);opacity:0;transition:opacity .2s}
+.plate.has-img:hover::before{opacity:1}
+
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  border:1px solid var(--line);border-bottom:0;margin:1.3rem 0 1.9rem}
+.spec div{padding:.7rem .85rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.spec div:last-child{border-right:0}
+.spec dt{font-family:var(--mono);font-size:.57rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 .3rem}
+.spec dd{margin:0;font-family:var(--mono);font-size:.76rem;color:var(--graphite);line-height:1.45}
+
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(1.4rem,4vw,3rem);align-items:start}
+.h4{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 .9rem}
+.notes{margin:0;padding:0;counter-reset:n;list-style:none}
+.notes li{counter-increment:n;position:relative;padding:0 0 .95rem 2.5rem;font-size:.94rem;line-height:1.65}
+.notes li::before{content:counter(n,decimal-leading-zero);position:absolute;left:0;top:.15rem;
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;color:var(--rev)}
+.notes b{color:var(--vellum);font-weight:600}
+.cap{font-family:var(--mono);font-size:.64rem;line-height:1.8;color:var(--dim);margin:.6rem 0 0}
+
+/* ---- capability schedule ---- */
+.scroller{overflow-x:auto}
+.schedule{width:100%;border-collapse:collapse;font-size:.9rem}
+.schedule th,.schedule td{text-align:left;vertical-align:top;padding:.8rem .9rem;border-bottom:1px solid var(--line)}
+.schedule thead th{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);font-weight:400;border-bottom-color:var(--line-2)}
+.schedule tbody th{font-family:var(--display);font-weight:600;text-transform:uppercase;
+  letter-spacing:.04em;font-size:1rem;color:var(--vellum);white-space:nowrap;width:1%;padding-right:2rem}
+.schedule td{font-family:var(--mono);font-size:.76rem;line-height:1.75}
+.schedule tbody tr:hover td,.schedule tbody tr:hover th{background:var(--mylar)}
+
+/* ---- footer ---- */
+.foot{padding:clamp(2.6rem,6vw,4.4rem) 0 3rem}
+.foot__cta{font-family:var(--display);font-weight:700;text-transform:uppercase;
+  font-size:clamp(1.8rem,5.5vw,3.6rem);line-height:.98;color:var(--vellum);margin:0 0 1rem}
+.foot__cta a{text-decoration:none;border-bottom:2px solid var(--rev)}
+.foot__cta a:hover{color:var(--rev)}
+.foot__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  border:1px solid var(--line);border-bottom:0;margin-top:2.2rem}
+.foot__grid div{padding:.7rem .85rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.foot__grid div:last-child{border-right:0}
+
+/* ---- lightbox ---- */
+.lb{position:fixed;inset:0;z-index:90;background:rgba(9,13,15,.96);
+  display:none;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:92vh;width:auto;height:auto;object-fit:contain}
+.lb__close{position:absolute;top:1rem;right:1rem;background:none;border:1px solid var(--line-2);
+  color:var(--graphite);font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+  text-transform:uppercase;padding:.5em .8em;cursor:pointer}
+.lb__close:hover{border-color:var(--graphite)}
+
+/* ---- motion ---- */
+.rise{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.rise.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rise{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* ---- responsive ---- */
+@media (max-width:880px){
+  .hero__grid,.split,.plates--2,.plates--brief{grid-template-columns:1fr}
+  .sheet__head{grid-template-columns:1fr;gap:.4rem}
+  .sheet__no{font-size:2.5rem}
+  .rail nav{gap:.85rem}
+}
+@media (max-width:560px){.todo__inner{flex-direction:column}}
+
+/* ---- print / save-as-PDF ---- */
+@page{size:letter portrait;margin:14mm}
+@media print{
+  :root{--field:#fff;--mylar:#fff;--mylar-2:#f4f4f2;--line:#bbb;--line-2:#888;
+        --graphite:#111;--dim:#555;--vellum:#000;
+        --rev:#B4006B;--check:#00688C;--misreg:0}
+  .sheet__no{color:#d8d8d8;text-shadow:none}
+  .todo,.rail,.lb{display:none}
+  body{font-size:10pt}
+  .rise{opacity:1;transform:none}
+  .plate.has-img::before{display:none}
+  .plate.has-img{cursor:auto}
+  .hero{padding-top:.5rem;break-after:page;page-break-after:always}
+  .fit{break-after:page;page-break-after:always}
+  .dim{break-before:page;page-break-before:always;padding-top:0}
+  .sheet{break-inside:auto;padding-bottom:0}
+  .plates--2,.plates--brief{grid-template-columns:1fr;gap:.5rem}
+  .plate{break-inside:avoid;page-break-inside:avoid}
+  .split{grid-template-columns:1fr 1fr;gap:1.2rem}
+  .notes li{font-size:9.5pt;padding-bottom:.5rem;break-inside:avoid}
+  .hero__name{font-size:44pt}
+  .sheet__title{font-size:17pt}
+  .foot__cta{font-size:20pt}
+  .foot{break-before:page;page-break-before:always}
+}
+</style>
+</head>
+<body>
+
+<header class="rail">
+  <div class="rail__inner">
+    <span class="rail__id">Virginia Kitchen</span>
+    <nav aria-label="Contents">
+      <a href="#fit">Approach</a>
+      <a href="#s01">01 Parker Aerospace</a>
+      <a href="#s02">02 Circus Magus</a>
+      <a href="#s03">03 Growth Mentor</a>
+      <a href="#s04">04 Turnaround</a>
+      <a href="#schedule">Capability</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════ TITLE BLOCK ═══════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero__grid">
+      <div>
+        <h1 class="hero__name">Virginia<br>Kitchen</h1>
+        <p class="hero__role">Concept execution — <em>2D source into finished 3D</em>, built to spec</p>
+        <p class="hero__thesis">Most of my work starts flat — a concept sheet, a set of elevations, sometimes just a
+          paragraph of requirements. Getting it into three dimensions without losing anything on the way across is the
+          job. <strong>A reference isn't inspiration, it's the spec</strong>, and what I hand back has to survive being
+          held up next to it — usually quickly, because the image is what someone is waiting on to make a decision.</p>
+      </div>
+      <dl class="block">
+        <div class="block__row"><dt class="block__k">Name</dt><dd class="block__v">Virginia Kitchen</dd></div>
+        <div class="block__row"><dt class="block__k">Experience</dt><dd class="block__v">10 yrs — games and entertainment art</dd></div>
+        <div class="block__row"><dt class="block__k">Credits</dt><dd class="block__v">2 Steam titles — lead character modeler (USC Games), visual dev</dd></div>
+        <div class="block__row"><dt class="block__k">Client work</dt><dd class="block__v">Parker Aerospace, 2024–present</dd></div>
+        <div class="block__row"><dt class="block__k">Email</dt><dd class="block__v"><a href="mailto:kitchen.virginia@gmail.com">kitchen.virginia@gmail.com</a></dd></div>
+        <div class="block__row"><dt class="block__k">LinkedIn</dt><dd class="block__v"><a href="https://www.linkedin.com/in/vck111/">/in/vck111</a></dd></div>
+        <div class="block__row"><dt class="block__k">Rev</dt><dd class="block__v">A — July 2026</dd></div>
+      </dl>
+    </div>
+    <div class="elig">
+      <span class="tag tag--check">U.S. Person</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ APPROACH — the bridge to the role ═══════════
+     This panel is what makes a character portfolio legible to a
+     reviewer hiring for operational graphics. Keep it short.
+     ══════════════════════════════════════════════════════════ -->
+<section class="fit" id="fit">
+  <div class="wrap">
+    <div class="fit__grid">
+      <div class="fit__cell">
+        <h3>Hit the reference</h3>
+        <p>2D in, 3D out, matching the source. Proportion, silhouette, colour, detail placement — checked against the
+          original at every stage rather than eyeballed at the end.</p>
+      </div>
+      <div class="fit__cell">
+        <h3>Work at volume</h3>
+        <p>A year of client work delivered to schedule, on top of a decade of collaborative and time-boxed projects.
+          Every sheet lists its turnaround, because on executional work the schedule is part of the spec.</p>
+      </div>
+      <div class="fit__cell">
+        <h3>Execute to direction</h3>
+        <p>Feedback comes in, I diagnose what's actually being asked for, and revise. No attachment to a first pass
+          that isn't landing.</p>
+      </div>
+      <div class="fit__cell">
+        <h3>Respect the standard</h3>
+        <p>Brand marks, palette, type and placement reproduced as specified — or integrated into the design when
+          that's what the brief calls for.</p>
+      </div>
+    </div>
+    <p class="fit__note">My background is games and entertainment art, not defense architecture — I haven't built
+      DoDAF products. Ten years of independent and collaborative games work, two credited Steam titles, and the past
+      year delivering client work to spec. Format conventions I'll pick up from a template and a first round of
+      redlines.</p>
+  </div>
+</section>
+
+<!-- ═══════════ SHEET 01 — CHARACTER (real work, live) ═══════════ -->
+<div class="wrap">
+  <div class="dim" id="s01"><span class="dim__label">01 — Elevation set to approval render</span><span class="dim__line"></span></div>
+</div>
+<section class="sheet rise">
+  <div class="wrap">
+    <div class="sheet__head">
+      <div class="sheet__no" aria-hidden="true">01</div>
+      <div>
+        <h2 class="sheet__title">Parker Aerospace — AUSA 2024 exhibit</h2>
+        <p class="sheet__sub">A full camera package for the show stand — exterior approaches, the graphic wall, and
+          the interior meeting room — built from a multi-sheet elevation set to millimetre accuracy, then lit and
+          staged so stakeholders could sign off on a build.</p>
+      </div>
+    </div>
+
+    <div class="plates plates--2">
+      <div class="plate" data-file="assets/AUSAParkerReference.png">
+        <img loading="lazy" src="assets/AUSAParkerReference.png" alt="Source elevations A-A and B-B">
+      </div>
+      <div class="plate" data-file="assets/AUSACamera1.jpg">
+        <img loading="lazy" src="assets/AUSACamera1.jpg" alt="Delivered render of the stand from the main corner">
+      </div>
+    </div>
+    <p class="cap">Elevations A-A and B-B, and the corner they resolve to.</p>
+
+    <div class="plates plates--2" style="margin-top:1.4rem">
+      <div class="plate" data-file="assets/AUSAParkerReference2.png">
+        <img loading="lazy" src="assets/AUSAParkerReference2.png" alt="Source elevation D-D of the graphic wall">
+      </div>
+      <div class="plate" data-file="assets/AUSACamera6.jpg">
+        <img loading="lazy" src="assets/AUSACamera6.jpg" alt="Delivered render of the graphic wall and welcome desk">
+      </div>
+    </div>
+    <p class="cap">Elevation D-D against the wall as built — product grid, Reliability panel, yellow rule and header
+      band all land where the drawing puts them.</p>
+
+    <div class="plates plates--2" style="margin-top:1.4rem">
+      <div class="plate" data-file="assets/AUSACamera2_02.jpg">
+        <img loading="lazy" src="assets/AUSACamera2_02.jpg" alt="Delivered render of the opposite approach with the vehicle">
+      </div>
+      <div class="plate" data-file="assets/AUSACamera5.jpg">
+        <img loading="lazy" src="assets/AUSACamera5.jpg" alt="Delivered interior render of the meeting room">
+      </div>
+    </div>
+    <p class="cap">Two more from the delivered set: the opposite approach, and the enclosed meeting room interior.</p>
+
+    <dl class="spec">
+      <div><dt>Client</dt><dd>Parker Aerospace</dd></div>
+      <div><dt>Show</dt><dd>AUSA 2024</dd></div>
+      <div><dt>Source</dt><dd>Multi-sheet elevation set</dd></div>
+      <div><dt>Tolerance</dt><dd>Modeled to spec, 1:1 mm</dd></div>
+      <div><dt>Delivered</dt><dd>6 final cameras, ext + int</dd></div>
+      <div><dt>Turnaround</dt><dd>2 weeks</dd></div>
+    </dl>
+
+    <div class="split">
+      <div>
+        <p class="h4">Build notes</p>
+        <ol class="notes">
+          <li><b>Dimensional fidelity.</b> Banner runs, rigging drops, wall heights, the header band, monitor and
+            graphic placement — modelled 1:1 off the dimensioned set rather than approximated by eye. The drawing was
+            the requirement, so the model had to survive being measured against it. Dimensions came off the blueprint
+            and went into Maya as exact millimetre values at 1:1 — no scaling, no eyeballing, no "close enough."</li>
+          <li><b>Brand compliance.</b> Logo lockups, the navy and yellow, headline typography and the product grid
+            reproduced to the standard. On client work the brand spec is as binding as the dimensions, and a render
+            that drifts on either is useless for approval.</li>
+          <li><b>A set, not a hero shot.</b> Elevations are flat and unlit — nobody can tell from them what the stand
+            will actually feel like. Taking the mockup to full 3D from every angle lets the client see the impact of
+            the booth and sign off on the layout before anything gets built. Six cameras covering both approaches,
+            the graphic wall and the interior meeting room, delivered in two weeks and approved after one round.</li>
+          <li><b>Separating the feedback from the action item.</b> The note back on the first pass was to make it
+            "a bit more realistic," which could have meant almost anything. The follow-up pinned it down: the client
+            wanted people and a vehicle added to the scene — assets to source — while the actionable item on my side
+            was the atmosphere. The pass they'd seen was unlit, so I did a lighting pass: directional key plus enough
+            fill to stand in for ambient. Vague feedback usually contains more than one request, and the first job is
+            working out which of them is yours.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="h4">Scope delivered</p>
+        <dl class="spec" style="grid-template-columns:1fr;margin-top:0">
+          <div><dt>Exterior</dt><dd>Both approaches + graphic wall</dd></div>
+          <div><dt>Interior</dt><dd>Enclosed meeting room</dd></div>
+          <div><dt>Populated</dt><dd>Figures for scale and sightline</dd></div>
+          <div><dt>Environment</dt><dd>Venue truss and lighting rig</dd></div>
+          <div><dt>Revisions</dt><dd>1 round to approval</dd></div>
+        </dl>
+        <p class="cap">Fill in the two bracketed numbers. On a role advertised as high-volume, the count and the
+          schedule are the argument.</p>
+
+        <p class="h4" style="margin-top:1.8rem">First pass</p>
+        <div class="plate" data-file="assets/AUSABefore.png">
+          <img loading="lazy" src="assets/AUSABefore.png" alt="Working Blender viewport grab of the stand before lighting and populated assets">
+        </div>
+        <p class="cap">Layout shared as a working viewport grab — geometry and graphics placed, deliberately before
+          any lighting spend. This is the pass the "more realistic" note came back on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SHEET 02 — ENVIRONMENT (drop your blueprint work here) ═══════════ -->
+<div class="wrap">
+  <div class="dim" id="s02"><span class="dim__label">02 — Concept sheet to finished model</span><span class="dim__line"></span></div>
+</div>
+<section class="sheet rise">
+  <div class="wrap">
+    <div class="sheet__head">
+      <div class="sheet__no" aria-hidden="true">02</div>
+      <div>
+        <h2 class="sheet__title">Circus Magus: The Apprentice — turnaround against concept</h2>
+        <p class="sheet__sub">Front and back of the sculpt, shown either side of the concept art it was built from.
+          One reference image in a single three-quarter pose — the whole back of the costume had to be reasoned out
+          from it. Presented as a high-poly sculpt; this was a skills-development piece, not a game asset.</p>
+      </div>
+    </div>
+
+    <div class="plates">
+      <div class="plate" data-file="assets/Turnaround.png">
+        <img loading="lazy" src="assets/Turnaround.png" alt="Front and back views of the finished 3D character flanking the original 2D concept art">
+      </div>
+    </div>
+    <p class="cap">Left and right: final model. Centre: source concept.</p>
+
+    <div class="plates" style="margin-top:1.4rem">
+      <div class="plate" data-file="assets/magus1.png">
+        <img loading="lazy" src="assets/magus1.png" alt="Detailed front render of the Circus Magus sculpt with the card prop">
+      </div>
+    </div>
+    <p class="cap">Front render with a fuller lighting pass.</p>
+
+    <dl class="spec">
+      <div><dt>Source</dt><dd>Single concept illustration</dd></div>
+      <div><dt>Stage</dt><dd>High-poly sculpt, polypainted</dd></div>
+      <div><dt>Not included</dt><dd>Retopology / game mesh</dd></div>
+      <div><dt>Software</dt><dd>ZBrush</dd></div>
+      <div><dt>Turnaround</dt><dd>8 weeks, part-time</dd></div>
+      <div><dt>Concept</dt><dd>Marie Magny, used with permission</dd></div>
+    </dl>
+
+    <div class="split">
+      <div>
+        <p class="h4">Build notes — rewrite in your own words</p>
+        <ol class="notes">
+          <li><b>Silhouette first.</b> The concept lives or dies on outline — twin hair volumes, the sash mass, the
+            skirt profile. Those were locked in blockout and checked against the reference before any detail went on.</li>
+          <li><b>Reasoning past the reference.</b> The source is a single three-quarter pose, so the entire back is
+            inference: how the sash ties off, where the panels close, how the legwear resolves. [Say what you decided
+            and why — this is the paragraph that proves you can work from an incomplete spec.]</li>
+          <li><b>Holding the asymmetry.</b> Mismatched legwear, off-center closures and the star motif are easy to
+            accidentally normalize. Keeping deliberate irregularity intact is a discipline problem, not a modeling one.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="h4">On the source</p>
+        <p style="font-size:.94rem;line-height:1.65;margin:0 0 1rem">Concept by <strong style="color:var(--vellum);font-weight:600">Marie
+          Magny</strong>, used with permission. It's professional character design, which raises the bar on the match
+          rather than lowering it — the asymmetries, the motif placement and the palette splits are all deliberate
+          choices, so none of them could be quietly simplified to make the build easier.</p>
+        <p class="cap">Presented as a sculpt. Retopology and a game mesh weren't in scope for this piece.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SHEET 03 — GROWTH MENTOR ═══════════ -->
+<div class="wrap">
+  <div class="dim" id="s03"><span class="dim__label">03 — Written brief to original design</span><span class="dim__line"></span></div>
+</div>
+<section class="sheet rise">
+  <div class="wrap">
+    <div class="sheet__head">
+      <div class="sheet__no" aria-hidden="true">03</div>
+      <div>
+        <h2 class="sheet__title">Growth Mentor — mascot from a written spec</h2>
+        <p class="sheet__sub">Three written requirements, no reference art: read as <em style="font-style:normal;color:var(--graphite)">mystical</em>,
+          derive from an animal, and incorporate the client's wheat-stalk mark. Designed and built against those.
+          Shown at model stage with base materials.</p>
+      </div>
+    </div>
+
+    <div class="plates plates--brief">
+      <div class="plate" data-file="assets/GrowthMentor.png">
+        <img loading="lazy" src="assets/GrowthMentor.png" alt="Original concept sketch for the Growth Mentor mascot">
+      </div>
+      <div class="plate" data-file="assets/growthTurn.png">
+        <img loading="lazy" src="assets/growthTurn.png" alt="Three-quarter, front and close turnaround of the Growth Mentor model">
+      </div>
+    </div>
+    <p class="cap">Left: my concept pass, developed from the written brief. Right: the model built from it.</p>
+
+    <dl class="spec">
+      <div><dt>Project</dt><dd>Growth Mentor mascot contest</dd></div>
+      <div><dt>Brief</dt><dd>3 written constraints, no art</dd></div>
+      <div><dt>Status</dt><dd>Competition entry</dd></div>
+      <div><dt>Deliverable</dt><dd>Mascot character</dd></div>
+      <div><dt>Stage</dt><dd>Model, base materials</dd></div>
+      <div><dt>Turnaround</dt><dd>1 week, concept to final</dd></div>
+      <div><dt>Software</dt><dd>ZBrush</dd></div>
+    </dl>
+
+    <div class="split">
+      <div>
+        <p class="h4">Build notes — rewrite in your own words</p>
+        <ol class="notes">
+          <li><b>The animal was an argument, not a preference.</b> The brief asked for something mystical, an
+            animal, the client's mark integrated — and it emphasised change and growth. That last word picked the
+            species: a frog is the textbook metamorphosis, an animal whose whole identity is becoming something else.
+            Mystical came through the hat, grimoire and staff.</li>
+          <li><b>The logo became the design.</b> The client's wheat-stalk mark is the staff finial and the emblem on
+            the book cover — carried as a structural element rather than stamped onto a surface, so it survives being
+            seen from any angle.</li>
+          <li><b>Concept to final in one week.</b> Design pass, model and presentation turnaround inside the
+            competition deadline, working from the written brief alone.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="h4">Why this one is here</p>
+        <p style="font-size:.94rem;line-height:1.65;margin:0 0 1rem">The other sheets show fidelity to supplied
+          artwork. This one shows the case where the brief is a sentence and the picture doesn't exist yet — and the
+          result still has to satisfy every stated requirement.</p>
+        <p class="cap">Shown at model stage rather than final render — labelled so, deliberately.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SHEET 04 — PINK ═══════════ -->
+<div class="wrap">
+  <div class="dim" id="s04"><span class="dim__label">04 — Sketch to textured turnaround</span><span class="dim__line"></span></div>
+</div>
+<section class="sheet rise">
+  <div class="wrap">
+    <div class="sheet__head">
+      <div class="sheet__no" aria-hidden="true">04</div>
+      <div>
+        <h2 class="sheet__title">VRChat avatar — pencil to finished asset</h2>
+        <p class="sheet__sub">Earlier personal work — a VRChat avatar taken start to finish solo, from pencil sketch
+          to a fully surfaced character presented as a standard turnaround. Included because it's the piece that
+          closes the loop from raw 2D all the way through to finished surface.</p>
+      </div>
+    </div>
+
+    <div class="plates plates--brief">
+      <div class="plate" data-file="assets/Pink.png">
+        <img loading="lazy" src="assets/Pink.png" alt="Original pencil concept sketch">
+      </div>
+      <div class="plate" data-file="assets/PinkBody.png">
+        <img loading="lazy" src="assets/PinkBody.png" alt="Five-view textured turnaround of the finished character with top view">
+      </div>
+    </div>
+    <p class="cap">Left: original pencil concept. Right: finished turnaround, five views plus top.</p>
+
+    <dl class="spec">
+      <div><dt>Source</dt><dd>Own pencil concept</dd></div>
+      <div><dt>Deliverable</dt><dd>Textured character</dd></div>
+      <div><dt>Views</dt><dd>5 + top orthographic</dd></div>
+      <div><dt>Software</dt><dd>ZBrush</dd></div>
+      <div><dt>Year</dt><dd>2019</dd></div>
+      <div><dt>Status</dt><dd>Personal work</dd></div>
+    </dl>
+
+    <div class="split">
+      <div>
+        <p class="h4">Build notes — rewrite in your own words</p>
+        <ol class="notes">
+          <li><b>Loose source, tight result.</b> The sketch is a rough pencil pass with unresolved areas — the model
+            had to commit to specifics the drawing only gestured at, while keeping the pose energy and proportions
+            the sketch established.</li>
+          <li><b>Surfaced, not just modelled.</b> Colour blocking, the drip motif across the legwear, and the fabric
+            versus skin read are all surface work rather than geometry.</li>
+          <li><b>Presented for review.</b> Five orthographic views plus a top, in one sheet — the format someone
+            approving a character actually needs, rather than a hero angle.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="h4">Note</p>
+        <p style="font-size:.94rem;line-height:1.65;margin:0">Older than the other sheets and shown as a working
+          viewport capture. Left as-is deliberately — it's what the review sheet looked like in production.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CAPABILITY ═══════════ -->
+<div class="wrap">
+  <div class="dim" id="schedule"><span class="dim__label">Capability</span><span class="dim__line"></span></div>
+</div>
+<section class="sheet rise">
+  <div class="wrap scroller">
+    <table class="schedule">
+      <thead><tr><th scope="col">Area</th><th scope="col">Tools</th><th scope="col">Depth</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Sculpt</th><td>ZBrush</td><td>Primary — 10 yrs</td></tr>
+        <tr><th scope="row">Modeling</th><td>Maya, Blender</td><td>Primary — 10 yrs</td></tr>
+        <tr><th scope="row">Retopo &amp; optimization</th><td>Game-ready topology, LODs, legacy asset audits</td><td>Production</td></tr>
+        <tr><th scope="row">Texture &amp; look</th><td>Substance Painter, Photoshop, Illustrator, Nuke</td><td>Production</td></tr>
+        <tr><th scope="row">Render</th><td>Arnold — lighting, camera, staging</td><td>Client work</td></tr>
+        <tr><th scope="row">Realtime</th><td>Unreal 5, Unity, Godot</td><td>Production</td></tr>
+        <tr><th scope="row">Terrain &amp; vegetation</th><td>SpeedTree, Maya — modeled to research specification</td><td>Proposal work</td></tr>
+        <tr><th scope="row">Pipeline &amp; code</th><td>C# review and refactoring, OBJ / FBX interchange, dimensioned drawings</td><td>Client work</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">Everything listed is something I've shipped work with, not something I've opened once.</p>
+  </div>
+</section>
+
+<!-- ═══════════ CONTACT ═══════════ -->
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <p class="foot__cta">Happy to talk through any of it.<br><a href="mailto:kitchen.virginia@gmail.com">kitchen.virginia@gmail.com</a></p>
+    <div class="foot__grid">
+      <div><p class="block__k">Email</p><p class="block__v"><a href="mailto:kitchen.virginia@gmail.com">kitchen.virginia@gmail.com</a></p></div>
+      <div><p class="block__k">LinkedIn</p><p class="block__v"><a href="https://www.linkedin.com/in/vck111/">/in/vck111</a></p></div>
+      <div><p class="block__k">Rev</p><p class="block__v">A — July 2026</p></div>
+    </div>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <button class="lb__close" type="button" aria-label="Close">Close ESC</button>
+  <img alt="">
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* Plates show their expected filename until the image actually loads. */
+  document.querySelectorAll(".plate img").forEach(function(img){
+    var ok = function(){ img.parentElement.classList.add("has-img"); };
+    if (img.complete && img.naturalWidth > 0) ok();
+    img.addEventListener("load", ok);
+    img.addEventListener("error", function(){ img.style.display = "none"; });
+  });
+
+  /* Click any loaded plate to enlarge. */
+  var lb = document.getElementById("lb"),
+      lbImg = lb.querySelector("img"),
+      lastFocus = null;
+
+  document.addEventListener("click", function(e){
+    var plate = e.target.closest(".plate.has-img");
+    if (plate){
+      var src = plate.querySelector("img");
+      lastFocus = document.activeElement;
+      lbImg.src = src.currentSrc || src.src;
+      lbImg.alt = src.alt;
+      lb.classList.add("open");
+      lb.querySelector(".lb__close").focus();
+      return;
+    }
+    if (lb.classList.contains("open")) close();
+  });
+
+  function close(){
+    lb.classList.remove("open");
+    lbImg.removeAttribute("src");
+    if (lastFocus) lastFocus.focus();
+  }
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && lb.classList.contains("open")) close();
+  });
+
+  /* One quiet reveal on scroll. */
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if ("IntersectionObserver" in window && !reduce){
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(x){ if (x.isIntersecting){ x.target.classList.add("in"); io.unobserve(x.target); } });
+    }, { rootMargin: "0px 0px -10% 0px" });
+    document.querySelectorAll(".rise").forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll(".rise").forEach(function(el){ el.classList.add("in"); });
+  }
+})();
+</script>
+</body>
+</html>
